@@ -6,6 +6,7 @@ int main(){
 	int cnt = 0, max = 0, ans, idx, len;
 	scanf(" %s", str);
 	len = strlen(str);
+	//for(int i=0;i<strlen(str);i++){ 하면 시간초과난다.
 	for (int i = 0; i < len; i++){
 		if (str[i] > 'Z'){
 			idx = str[i] - 'a';
