@@ -3,18 +3,14 @@
 #include <vector>
 using namespace std;
 
-int N, M, K;
-int flow[2003][2003];
-int parent[2003];
-vector<int> adj[2003];
+int N, M, K, adder;
+int flow[2002][2002];
+int parent[2002];
+vector<int> adj[2002];
 
 int network_flow(void);
 int main(){
 	scanf("%d%d%d", &N, &M, &K);
-	int plus_node = N + M + 2;
-	adj[0].push_back(plus_node);
-	adj[plus_node].push_back(0);
-	flow[0][plus_node] = K;
 	for (int i = 1; i <= N; i++){
 		int num, home;
 		scanf("%d", &num);
@@ -25,10 +21,14 @@ int main(){
 			adj[N + home].push_back(i);
 		}
 	}
+	adder = N + M + 2;
+	flow[0][adder] = K;
+	adj[0].push_back(adder);
+	adj[adder].push_back(0);
 	for (int i = 1; i <= N; i++) {
-		flow[plus_node][i] = 1;
-		adj[plus_node].push_back(i);
-		adj[i].push_back(plus_node);
+		flow[adder][i] = 1;
+		adj[adder].push_back(i);
+		adj[i].push_back(adder);
 		flow[0][i] = 1;
 		adj[0].push_back(i);
 		adj[i].push_back(0);
@@ -52,7 +52,7 @@ int network_flow(){
 		}
 		parent[0] = -2;
 		myQ.push(S);
-		while (!myQ.empty()){
+		while (!myQ.empty() && parent[T] == -1){
 			int now = myQ.front();
 			myQ.pop();
 			for (int k = 0; k < adj[now].size(); k++){
@@ -60,7 +60,6 @@ int network_flow(){
 				if (parent[next] == -1 && flow[now][next]>0){
 					myQ.push(next);
 					parent[next] = now;
-					if (next == T)break;
 				}
 			}
 		}
