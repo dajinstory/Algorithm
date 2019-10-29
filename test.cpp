@@ -1,71 +1,114 @@
 #include <stdio.h>
-#include <vector>
 #include <algorithm>
+#include <vector>
+#include <queue>
 using namespace std;
-typedef long long ll;
 
-ll arr[3004];
-ll arr_sum[3004];
-ll dp[3004][2]; //헬기가 마지막으로 내린 곳이 i번째일 때, i번째 위치까지 배달한 가격.
-int N,C,H;
+int N;
 
-ll getSum(int s, int e){ // s<=e
-    if(s==e+1)return 0;
-    if(s==0)return arr_sum[e];
-    return arr_sum[e]-arr_sum[s-1];
+char map[54][54];
+int maph[54][54];
+int visit[54][54];
+vector<int> heights;
+vector< pair< int, pair<int,int> > > P;
+queue< pair<int,int> > myQ;
+
+int bfs(int si, int sj, int min_height, int max_height){
+	int xx[8]={1,1,1,0,0,-1,-1,-1};
+	int yy[8]={1,0,-1,1,-1,1,0,-1};
+	int rests=P.size();
+
+	for(int i=1;i<=N;i++){
+		for(int j=1;j<=N;j++){
+			visit[i][j]=0;
+		}
+	}
+
+	visit[si][sj]=1;
+	myQ.push(make_pair(si,sj));
+	rests--;
+	while(!myQ.empty()){
+		int i,j;
+		i=myQ.front().first;
+		j=myQ.front().second;
+		myQ.pop();
+		for(int k=0;k<8;k++){
+			int ni,nj;
+			ni=i+xx[k];
+			nj=j+yy[k];
+
+			if(ni<1||nj<1||ni>N||nj>N||maph[ni][nj]<min_height||maph[ni][nj]>max_height){
+				continue;
+			}
+
+			if(!visit[ni][nj]){
+				visit[ni][nj]=1;
+				myQ.push(make_pair(ni,nj));
+				if(map[ni][nj]=='P' || map[ni][nj]=='K'){
+					rests--;
+				}
+				while( !rests && !myQ.empty()){
+					myQ.pop();
+				}
+			}
+		}
+	}
+	return rests==0;
 }
 
-ll getCost(int s, int e){ // s<=e
-    ll mid = (arr[s]+arr[e]+1)/2;
-    int idx = lower_bound(arr,arr+N+1,mid)-arr;
-    return C*(getSum(s,idx-1) - arr[s]*(idx-s) + arr[e]*(e-idx+1) - getSum(idx,e));
+int parametric_search(int si, int sj, int min_height, int idx_l, int idx_h){
+	while(idx_l>idx_h){
+		int idx_mid=(idx_l+idx_h)/2;
+		if(bfs(si,sj,min_height,heights[idx_mid])){
+			idx_h=idx_mid-1;
+		}
+		else{
+			idx_l=idx_mid+1;
+		}
+	}
+	return idx_l;
 }
 
 int main(){
 
-    // get input
-    scanf("%d",&N);   
-    for(int i=1;i<=N;i++){
-        scanf("%d",&arr[i]);
-    }
-    scanf("%d%d",&C,&H);
+	//input
+	scanf("%d",&N);
+	for(int i=1;i<=N;i++){
+		for(int j=1;j<=N;j++){
+			scanf(" %c",&map[i][j]);
+		}
+	}
+	for(int i=1;i<=N;i++){
+		for(int j=1;j<=N;j++){
+			scanf("%d",&maph[i][j]);
+			heights.push_back(maph[i][j]);
+			if(map[i][j]=='P' || map[i][j]=='K'){
+				P.push_back(make_pair(maph[i][j], make_pair(i,j)));
+			}
+		}
+	}
 
-    // set inital state
-    sort(arr, arr+N+1);
-    for(int i=1;i<=N;i++){
-        arr_sum[i]=arr[i]+arr_sum[i-1];
-        dp[i][0]=9876543210;
-        dp[i][1]=N;
-    }
-    dp[0][0]=0;
-    dp[0][1]=0;
+	//solve
+	sort(P.begin(), P.end());
+	sort(heights.begin(), heights.end());
+	int start_i = P[0].second.first;
+	int start_j = P[0].second.second;
+	int idx_start=lower_bound(heights.begin(), heights.end(), P[0].first)-heights.begin();
+	int idx_l=lower_bound(heights.begin(), heights.end(), P[P.size()-1].first)-heights.begin();
+	int ans=1000000;
+	int idx_h=N*N-1;
+	for(int i=idx_start; i>=0; i--){
+		idx_h = parametric_search(start_i, start_j, heights[i], idx_l, idx_h);
+		if(idx_h==N*N){
+			idx_h=N*N-1;
+			continue;
+		}
+		if(idx_h==-1) break;
+		
+		if(heights[idx_h]-heights[i]<ans)ans=heights[idx_h]-heights[i];
 
-    // solve with dp
-    for(int i=0;i<N;i++){
-        if(i>0 && arr[i]==arr[i-1])continue;
-        for(int j=i+1;j<=N;j++){
-            ll cost = getCost(i,j)+H;
-            if(dp[i][0]+cost<dp[j][0]){
-                dp[j][0] = dp[i][0]+cost;
-                dp[j][1] = dp[i][1]+1;
-            }
-            else if(dp[i][0]+cost==dp[j][0] && dp[j][1]>dp[i][1]+1){
-                dp[j][1]=dp[i][1]+1;
-            }
-            //printf("%d %d %lld %lld\n",i,j,dp[j][0], cost);
-        }
-    }
-
-    // get answer
-    ll ans=C*getSum(0,N-1);
-    for(int i=0;i<=N;i++){
-        //printf("%lld ", dp[i][0]);
-        if(i>0 && arr[i]==arr[i-1])continue;
-        ll subans=dp[i][0]+C*(getSum(i+1,N)-arr[i]*(N-i));
-        if(subans<ans){
-            ans=subans;
-        }
-    }
-    printf("%lld",ans);
-    return 0;
+		if(heights[idx_h]==heights[idx_l])break;
+	}
+	printf("%d",ans);
+	return 0;
 }
