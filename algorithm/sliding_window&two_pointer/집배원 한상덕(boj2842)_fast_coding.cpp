@@ -1,11 +1,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <algorithm>
-#include <queue>
 #include <vector>
 using namespace std;
 
-queue<pair<int,int> > myQ;
 vector<int> heights;
 
 char map[54][54];
@@ -18,31 +16,19 @@ int minH, maxH, minIdx, maxIdx;
 int si, sj, cnt;
 int N, ans=1000000;
 
-int bfs(int si, int sj, int minH, int maxH){	
-	int rest=cnt;
-	visit[si][sj]=true;
-	myQ.push(make_pair(si,sj));
-    rest--;
-	while(!myQ.empty()){
-		int x = myQ.front().first;
-		int y = myQ.front().second;
-		myQ.pop();
-		for(int k=0;k<8;k++){
-			int nx=x+xx[k];
-			int ny=y+yy[k];			
-			if(mapH[nx][ny]<minH || mapH[nx][ny]>maxH)continue;
-			if(!visit[nx][ny]){
-				visit[nx][ny] = true;
-				myQ.push(make_pair(nx,ny));
-				if(map[nx][ny] == 'K'){
-					rest--;
-				}
-			}
+int dfs(int x, int y, int minH, int maxH){	
+	int re=0;
+	visit[x][y]=true;
+	if(map[x][y]=='K')re++;
+	for(int k=0;k<8;k++){
+		int nx=x+xx[k];
+		int ny=y+yy[k];			
+		if(mapH[nx][ny]<minH || mapH[nx][ny]>maxH)continue;
+		if(!visit[nx][ny]){
+			re+= dfs(nx,ny,minH,maxH);
 		}
-		if(!rest)break;
 	}
-    while(!myQ.empty())myQ.pop();
-	return rest==0;
+	return re;
 }
 int main(){
 	//input
@@ -78,7 +64,7 @@ int main(){
 	//solve
 	for(int idx_l=0, idx_r=maxIdx ; idx_l<=minIdx && idx_r<N*N && idx_l<=idx_r;){
         memset(visit,0,sizeof(visit));
-		if(bfs(si, sj, heights[idx_l], heights[idx_r])){
+		if(cnt == dfs(si, sj, heights[idx_l], heights[idx_r])){
 			if(heights[idx_r] - heights[idx_l] < ans){
 				ans=heights[idx_r] - heights[idx_l];
 			}
