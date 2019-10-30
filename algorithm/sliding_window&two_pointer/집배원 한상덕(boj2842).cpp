@@ -37,7 +37,7 @@ int bfs(int si, int sj, int min_height, int max_height){
 			ni=i+xx[k];
 			nj=j+yy[k];
 
-			if(ni<1||nj<1||ni>N||nj>N||maph[ni][nj]<min_height||maph[ni][nj]>max_height){
+			if(maph[ni][nj]<min_height||maph[ni][nj]>max_height){
 				continue;
 			}
 
@@ -54,19 +54,6 @@ int bfs(int si, int sj, int min_height, int max_height){
 		}
 	}
 	return rests==0;
-}
-
-int parametric_search(int si, int sj, int min_height, int idx_l, int idx_h){
-	while(idx_l<=idx_h){
-		int idx_mid=(idx_l+idx_h)/2;
-		if(bfs(si,sj,min_height,heights[idx_mid])){
-			idx_h=idx_mid-1;
-		}
-		else{
-			idx_l=idx_mid+1;
-		}
-	}
-	return idx_l;
 }
 
 int main(){
@@ -95,10 +82,8 @@ int main(){
 	int start_j = P[0].second.second;
 	int idx_l = 0;
 	int idx_r = lower_bound(heights.begin(), heights.end(), P[P.size()-1].first)-heights.begin();
-
 	int ans=1000000;
-	int idx_h=N*N-1;
-	for(idx_l, idx_r; idx_l <= idx_r && idx_r<N*N; ){
+	for(idx_l, idx_r; heights[idx_l]<=P[0].first && idx_r<N*N && idx_l <= idx_r; ){
 		if(bfs(start_i,start_j,heights[idx_l],heights[idx_r])){
 			if(heights[idx_r]-heights[idx_l]<ans){
 				ans=heights[idx_r]-heights[idx_l];
