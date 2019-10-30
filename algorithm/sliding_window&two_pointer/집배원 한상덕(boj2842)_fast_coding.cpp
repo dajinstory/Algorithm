@@ -11,19 +11,18 @@ vector<int> heights;
 char map[54][54];
 int mapH[54][54];
 bool visit[54][54];
-int minH, maxH, minIdx, maxIdx, si, sj, cnt;
+int xx[8]={1,1,1,0,0,-1,-1,-1};
+int yy[8]={1,0,-1,1,-1,1,0,-1};
+
+int minH, maxH, minIdx, maxIdx;
+int si, sj, cnt;
 int N, ans=1000000;
 
 int bfs(int si, int sj, int minH, int maxH){	
-	memset(visit, 0, sizeof(visit));
-
-	int xx[8]={1,1,1,0,0,-1,-1,-1};
-	int yy[8]={1,0,-1,1,-1,1,0,-1};
 	int rest=cnt;
-
-	visit[si][sj]=1;
+	visit[si][sj]=true;
 	myQ.push(make_pair(si,sj));
-	rest--;
+    rest--;
 	while(!myQ.empty()){
 		int x = myQ.front().first;
 		int y = myQ.front().second;
@@ -33,17 +32,16 @@ int bfs(int si, int sj, int minH, int maxH){
 			int ny=y+yy[k];			
 			if(mapH[nx][ny]<minH || mapH[nx][ny]>maxH)continue;
 			if(!visit[nx][ny]){
-				visit[nx][ny]=true;
+				visit[nx][ny] = true;
 				myQ.push(make_pair(nx,ny));
-				if(map[nx][ny]=='K'){
+				if(map[nx][ny] == 'K'){
 					rest--;
 				}
-				
 			}
 		}
 		if(!rest)break;
 	}
-	while(!myQ.empty())myQ.pop();
+    while(!myQ.empty())myQ.pop();
 	return rest==0;
 }
 int main(){
@@ -79,6 +77,7 @@ int main(){
 
 	//solve
 	for(int idx_l=0, idx_r=maxIdx ; idx_l<=minIdx && idx_r<N*N && idx_l<=idx_r;){
+        memset(visit,0,sizeof(visit));
 		if(bfs(si, sj, heights[idx_l], heights[idx_r])){
 			if(heights[idx_r] - heights[idx_l] < ans){
 				ans=heights[idx_r] - heights[idx_l];
