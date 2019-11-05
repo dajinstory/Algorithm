@@ -3,7 +3,7 @@
 #define MAX(A,B)((A)>(B)?(A):(B))
 
 int arr[1004];
-int dp[1004][30];
+int dp[1004][34];
 int T,W,ans;
 
 int main(){
