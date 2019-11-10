@@ -1,14 +1,16 @@
 #include <stdio.h>
+#include <iostream>
+#include <unordered_map>
 #define MAX(A,B)((A)>(B)?(A):(B))
+using namespace std;
 typedef long long ll;
 
-ll dp[8200004];
+unordered_map<ll,ll> dp;
 int T,N;
 
-ll getDP(int num){
-	if(num>8200004)printf("\nerror with %d", num);
-	if(dp[num])return dp[num];
-	int next_num = (num%2==0 ? (num/2):(num*3+1));
+ll getDP(ll num){
+	if(dp.find(num)!=dp.end())return dp[num];
+	ll next_num = (num%2==0 ? (num/2):(num*3+1));
 	return dp[num]=MAX(num, getDP(next_num));
 }
 
