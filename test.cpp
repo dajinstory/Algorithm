@@ -1,37 +1,25 @@
 #include <stdio.h>
-#include <vector>
-#define MIN(A,B)((A)<(B)?(A):(B))
-using namespace std;
+typedef long long ll;
 
-vector<int> friends[1000001];
-int dp[1000001][2];
-bool visit[1000001][2];
-int N, cnt;
+ll dp[31];
+int N;
+ll ans;
 
-int getDP(int pre, int now, int check){
-	if(visit[now][check])return dp[now][check];
-	visit[now][check]=true;
-	if(check)dp[now][check]=1;
-	for(int i=0;i<friends[now].size();i++){
-		int next=friends[now][i];
-		if(next==pre)continue;
-		int plus=getDP(now,next,1);
-		if(check==1){
-			plus=MIN(plus,getDP(now,next,0));
-		}
-		dp[now][check]+=plus;
-	}
-	return dp[now][check];
+ll getDP(int n){
+	if(n<0)return 0;
+	if(dp[n])return dp[n];
+	return dp[n]=getDP(n-2)*2+getDP(n-1);
 }
 
 int main(){
+	dp[0]=1;
 	scanf("%d",&N);
-	for(int i=0;i<N-1;i++){
-		int a,b;
-		scanf("%d%d",&a,&b);
-		friends[a].push_back(b);
-		friends[b].push_back(a);
+	if(N%2){
+		ans=(getDP(N)+getDP(N/2))/2;
 	}
-	printf("%d",MIN(getDP(-1,1,0), getDP(-1,1,1)));
+	else{
+		ans=(getDP(N)+getDP(N/2)+getDP(N/2-1)*2)/2; 
+	}
+	printf("%lld",ans);
 	return 0;
 }
